@@ -7,82 +7,63 @@ import CryptoJS from "crypto-js";
 import { generaterefreshToken, generateToken } from "../../utils/tokens/index.js";
 import jwt from "jsonwebtoken";
 export const register=async(req,res,next)=>{
-    try{
-
-        const{fullName,email,password,phoneNumber,dob}=req.body;
-        const user = await User.findOne({
-            $or: [
-              {
-                $and: [
-                  { email: { $exists: true } },
-                  { email: { $ne: null } },
-                  { email: email }
-                ]
-              },
-              {
-                $and: [
-                  { phoneNumber: { $exists: true } },
-                  { phoneNumber: { $ne: null } },
-                  { phoneNumber: phoneNumber }
-                ]
-              }
-            ]
-          });
-        if(user){          
-            throw new Error("User already exists",{cause:409});
-        }
-        const hashedPassword=bcrypt.hashSync(password,10);
-        const encryptedPhoneNumber=CryptoJS.AES.encrypt(phoneNumber,"kkjhgfdsasdfghjkl").toString();
-        const newUser=new User({fullName,email,phoneNumber:encryptedPhoneNumber,dob,password:hashedPassword});
-        const{otp,otpExpired}=generateOtp();
-        newUser.otp=otp;
-        newUser.otpExpired=otpExpired;
-        await sendMail({to:email,subject:"Verify your email",html:`<p>your Otp to verify your account is ${otp}</p>`})
-        await newUser.save();
-        return res.status(201).json({message:"User registered successfully",success:true});
+ const{fullName,email,password,phoneNumber,dob}=req.body;
+      const user = await User.findOne({
+          $or: [
+            {
+              $and: [
+                { email: { $exists: true } },
+                { email: { $ne: null } },
+                { email: email }
+              ]
+            },
+            {
+              $and: [
+                { phoneNumber: { $exists: true } },
+                { phoneNumber: { $ne: null } },
+                { phoneNumber: phoneNumber }
+              ]
+            }
+          ]
+        });
+      if(user){          
+          throw new Error("User already exists",{cause:409});
+      }
+      const hashedPassword=bcrypt.hashSync(password,10);
+      const encryptedPhoneNumber=CryptoJS.AES.encrypt(phoneNumber,"kkjhgfdsasdfghjkl").toString();
+      const newUser=new User({fullName,email,phoneNumber:encryptedPhoneNumber,dob,password:hashedPassword});
+      const{otp,otpExpired}=generateOtp();
+      newUser.otp=otp;
+      newUser.otpExpired=otpExpired;
+      await sendMail({to:email,subject:"Verify your email",html:`<p>your Otp to verify your account is ${otp}</p>`})
+      await newUser.save();
+      return res.status(201).json({message:"User registered successfully",success:true});
     }
-    catch(error){
-        return res.status(error.cause||500).json({message:error.message,success:false});
-    }
-
-};
 export const VerifyAccount =async(req,res,next)=>{
-    try{
-  const{email,otp}=req.body;
-  const user=await User.findOne({email,otp,otpExpired:{$gte:Date.now()}});
-  if(!user){
-    throw new Error("Invalid otp",{cause:401});
-  }
-  user.isVerified=true;
-  user.otp=undefined;
-  user.otpExpired=undefined;
-  await user.save();
-  return res.status(200).json({message:"User verified successfully",success:true});
+const{email,otp}=req.body;
+const user=await User.findOne({email,otp,otpExpired:{$gte:Date.now()}});
+if(!user){
+  throw new Error("Invalid otp",{cause:401});
 }
-    catch(error){
-        return res.status(error.cause||500).json({message:error.message,success:false});
-    }
-};
+user.isVerified=true;
+user.otp=undefined;
+user.otpExpired=undefined;
+await user.save();
+return res.status(200).json({message:"User verified successfully",success:true});
+}
 
 export const reSendOtp=async(req,res,next)=>{
-  try{
 const{email}=req.body;
 const {otp,otpExpired}=generateOtp();
 await User.updateOne({email},{otp,otpExpired});
 await sendMail({to:email,subject:"Resend your email",html:`<p>your Otp to verify your account is ${otp}</p>`})
 return res.status(200).json({message:"Otp sent successfully",success:true});
   }
-  catch(err){
-    return res.status(err.cause||500).json({message:err.message,success:false});
-  }
-
-}
 
 
 
 export const login=async(req,res,next)=>{
 
-    try{
         const {email,phoneNumber,password}=req.body;
         const user=await User.findOne({$or: [
             {
@@ -113,14 +94,8 @@ export const login=async(req,res,next)=>{
     const refreshToken = generaterefreshToken(user._id);
     return res.status(200).json({message:"user login successfully",success:true,token,refreshToken});
 }
-    catch(err){
-        return res.status(err.cause||500).json({message:err.message,success:false});
-    }
-
-}
-
 export const googleLogin=async(req,res,next)=>{
-  try{
+ 
     const {idToken} = req.body;
     const client =new OAuth2Client("https://851795671125-a22v1m8afbnd64h1ah15jget51eq0t9u.apps.googleusercontent.com/");
     const ticket=await client.verifyIdToken(idToken);
@@ -132,30 +107,14 @@ export const googleLogin=async(req,res,next)=>{
     }
     const token=generateToken(user._id);
     return res.status(200).json({message:"user login successfully",success:true,token,user});
-
-  
-
-  }
-  catch(err){
-    return res.status(err.cause||500).json({message:err.message,success:false});
-  }
-
 }
 
 
 export const refresh=async(req,res,next)=>{
-  try{
     const token=req.headers.authorization;
     const payload= jwt.verify(token,"julisdfghnvbn");
     const id=payload.id;
     const newToken=generateToken(id);
     const newRefreshToken=generaterefreshToken(id);
     return res.status(200).json({message:"user login successfully",success:true,token:newToken,refreshToken:newRefreshToken});
-
-  }
-  catch(err){
-    return res.status(err.cause||500).json({message:err.message,success:false});
-
-  }
-
 }

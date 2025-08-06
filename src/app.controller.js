@@ -9,6 +9,10 @@ export const bootstrap=(app,express)=>{
     app.use("/user",userRouter);
     app.use("/message",messageRouter);
     ConnectDB();
+    //global error handler
+    app.use((err,req,res,next)=>{
+        return res.status(err.cause||500).json({message:err.message,success:false,stack:err.stack});
+    });
 
 
 }
