@@ -6,8 +6,10 @@ import { OAuth2Client } from "google-auth-library";
 import CryptoJS from "crypto-js";
 import { generaterefreshToken, generateToken } from "../../utils/tokens/index.js";
 import jwt from "jsonwebtoken";
+import joi from "joi";
 export const register=async(req,res,next)=>{
  const{fullName,email,password,phoneNumber,dob}=req.body;
+ 
       const user = await User.findOne({
           $or: [
             {
@@ -35,7 +37,9 @@ export const register=async(req,res,next)=>{
       const{otp,otpExpired}=generateOtp();
       newUser.otp=otp;
       newUser.otpExpired=otpExpired;
+      if(email){
       await sendMail({to:email,subject:"Verify your email",html:`<p>your Otp to verify your account is ${otp}</p>`})
+      }
       await newUser.save();
       return res.status(201).json({message:"User registered successfully",success:true});
     }
