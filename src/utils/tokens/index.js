@@ -8,3 +8,7 @@ export const generaterefreshToken=(id)=>{
     refreshToken.push(token);
     return token;
 }
+export const verifyToken=(token,secretKey="kkjhgfdsasdfghjkl")=>{
+    return jwt.verify(token,secretKey);
+
+}

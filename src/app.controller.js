@@ -4,6 +4,7 @@ import cors from "cors";
 export const bootstrap=(app,express)=>{
 
     app.use(express.json());
+    app.use("/Uploads",express.static("Uploads"));
     app.use(cors({origin:"*"}));
     app.use("/auth",authRouter);
     app.use("/user",userRouter);

@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import User from "../../DB/model/user.model.js";
 import bcrypt from "bcrypt";
+import { verifyToken } from "../../utils/tokens/index.js";
 
 export const deleteUser=async(req,res,next)=>{
    
@@ -37,4 +38,14 @@ export const updatePassword=async(req,res,next)=>{
 
  
 
+}
+export const UploadProfilePic=async(req,res,next)=>{
+    const token=req.headers.authorization;
+
+   const {id}=verifyToken(token);
+   const user=await User.findByIdAndUpdate(id,{ProfilePic:req.file.path},{new:true});
+   if(!user){
+    throw new Error("User not found",{cause:404});
+   }
+   return res.status(200).json({message:"Profile pic uploaded successfully",success:true,user});
 }

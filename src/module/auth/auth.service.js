@@ -89,11 +89,14 @@ export const login=async(req,res,next)=>{
 
     if(!user){
         throw new  Error("Invalid cradintials",{cause:401});
-    }
+    } 
     const match=bcrypt.compareSync(password,user.password);
     if(!match){  
         throw new  Error("Invalid cradintials",{cause:401});
     }
+    if(!(user.isVerified)){
+      throw new Error("User not verified",{cause:401});
+  }   
     const token = generateToken(user._id);
     const refreshToken = generaterefreshToken(user._id);
     return res.status(200).json({message:"user login successfully",success:true,token,refreshToken});

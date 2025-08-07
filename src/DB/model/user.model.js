@@ -48,6 +48,9 @@ const schema = new Schema({
         type:String,
         enum:["local","google"],
         default:"local"
+    },
+    ProfilePic:{
+        type:String
     }
 
 },
