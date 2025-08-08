@@ -1,12 +1,24 @@
 import multer from "multer";
 import { nanoid } from "nanoid";
-export function fileUpload(){
+import fs from "fs";
+export function fileUpload({folder,allowedType=["image/jpeg","image/png","image/jpg"]}={}){
     const storage=multer.diskStorage({
-        destination:"Uploads",
+        destination:(req,file,cb)=>{
+            const dest=`Uploads/${req.user._id}/${folder}`;
+            if(!fs.existsSync(dest)){
+                fs.mkdirSync(dest,{recursive:true});
+            }
+            cb(null,dest);
+        },
         filename:(req,file,cb)=>{
-            console.log(file);
             cb(null,nanoid(5)+"_"+file.originalname);
         }
     });
-    return multer({storage});
+    const fileFilter=(req,file,cb)=>{
+        if(allowedType.includes(file.mimetype)){
+            cb(null,true);
+        }
+        else{cb(new Error("Invalid file Type",{cause:400}),false);}
+    }
+    return multer({fileFilter,storage});
 }
