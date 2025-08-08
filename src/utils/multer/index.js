@@ -1,7 +1,7 @@
 import multer from "multer";
 import { nanoid } from "nanoid";
 import fs from "fs";
-export function fileUpload({folder,allowedType=["image/jpeg","image/png","image/jpg"]}={}){
+export function fileUpload({folder,allowedType=["image/jpeg","image/png","image/jpg"],MxSizeMB=2}={}){
     const storage=multer.diskStorage({
         destination:(req,file,cb)=>{
             const dest=`Uploads/${req.user._id}/${folder}`;
@@ -20,5 +20,5 @@ export function fileUpload({folder,allowedType=["image/jpeg","image/png","image/
         }
         else{cb(new Error("Invalid file Type",{cause:400}),false);}
     }
-    return multer({fileFilter,storage});
+    return multer({fileFilter,storage,limits:{fileSize:MxSizeMB*1024*1024}});
 }

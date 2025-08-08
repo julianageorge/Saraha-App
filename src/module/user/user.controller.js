@@ -6,5 +6,5 @@ import { isAuthenticated } from "../../middlewares/auth.middleware.js";
 const router =Router();
 router.delete("/",deleteUser)
 router.put("/update-password",updatePassword);
-router.post("/upload-profile-pic",isAuthenticated,fileUpload({folder:"profilepics"}).single("ProfilePic"),fileValidationMiddleware(),UploadProfilePic);
+router.post("/upload-profile-pic",isAuthenticated,fileUpload({folder:"profilepics",MxSizeMB:1}).single("ProfilePic"),fileValidationMiddleware(),UploadProfilePic);
 export default router;
