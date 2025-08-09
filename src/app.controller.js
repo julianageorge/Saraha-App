@@ -2,6 +2,7 @@ import ConnectDB from "./DB/connection.js";
 import {authRouter,userRouter,messageRouter} from "./module/index.js";
 import cors from "cors";
 import fs from "fs";
+import { DeleteUnverifiedUsers } from "./module/user/user.service.js";
 export const bootstrap=(app,express)=>{
 
     app.use(express.json());
@@ -18,6 +19,7 @@ export const bootstrap=(app,express)=>{
         }
         return res.status(err.cause||500).json({message:err.message,success:false,stack:err.stack});
     });
+    DeleteUnverifiedUsers();
 
 
 }

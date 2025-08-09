@@ -51,6 +51,10 @@ const schema = new Schema({
     },
     ProfilePic:{
         type:String
+    },
+    lastActive:{
+        type:Date,
+        default:Date.now()
     }
 
 },

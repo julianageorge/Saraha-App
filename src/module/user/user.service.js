@@ -3,7 +3,7 @@ import User from "../../DB/model/user.model.js";
 import bcrypt from "bcrypt";
 import { verifyToken } from "../../utils/tokens/index.js";
 import fs from "fs";
-
+import cron from "node-cron";
 export const deleteUser=async(req,res,next)=>{
    
         const token=req.headers.authorization;
@@ -50,4 +50,22 @@ export const UploadProfilePic=async(req,res,next)=>{
     throw new Error("User not found",{cause:404});
    }
    return res.status(200).json({message:"Profile pic uploaded successfully",success:true,user});
+}
+
+export const DeleteUnverifiedUsers=()=>{
+    cron.schedule(`* * * * *`,async()=>{
+       const oneMonthAgo= new Date();
+       oneMonthAgo.setMonth(oneMonthAgo.getMonth()-1);
+        
+       const unverifiedUsers = await User.deleteMany({
+        isVerified: false,
+        createdAt: { $lt: oneMonthAgo }
+    });
+
+    if (unverifiedUsers.deletedCount > 0) {
+        console.log(`Delete ${unverifiedUsers.deletedCount} unverified accounts created before ${oneMonthAgo}`);
+    } else {
+        console.log(`No unverified users found for deletion`);
+    }
+    })
 }
