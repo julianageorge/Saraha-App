@@ -50,7 +50,9 @@ const schema = new Schema({
         default:"local"
     },
     ProfilePic:{
-        type:String
+       secure_url:{type:String},
+       public_id:{type:String}
+
     },
     lastActive:{
         type:Date,

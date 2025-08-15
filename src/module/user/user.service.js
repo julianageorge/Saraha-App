@@ -1,33 +1,23 @@
-import jwt from "jsonwebtoken";
 import User from "../../DB/model/user.model.js";
 import bcrypt from "bcrypt";
-import { verifyToken } from "../../utils/tokens/index.js";
 import fs from "fs";
 import cron from "node-cron";
+import cloudinary from "../../utils/cloud/cloudinary.config.js";
 export const deleteUser=async(req,res,next)=>{
-   
-        const token=req.headers.authorization;
-        const payload=jwt.verify(token,"kkjhgfdsasdfghjkl");
-        const id=payload.id;
-        const deleteUser=await User.findByIdAndDelete(id);
-        if(!deleteUser){
-            throw new Error("User not found",{cause:404});
-        }
+        const {id}=req.user;
+        //delete from cloudinary
+        if(req.user.ProfilePic.public_id){
+          await cloudinary.api.delete_resources_by_prefix(`saraha/${id}/profilepics`);
+        }  await cloudinary.api.delete_folder(`saraha/${id}/profilepics`);
+         await User.deleteOne({_id:id});
         return res.status(200).json({message:"User deleted successfully",success:true});
 
    
 }
 
 export const updatePassword=async(req,res,next)=>{
-   
-        const token=req.headers.authorization;
-        const payload=jwt.verify(token,"kkjhgfdsasdfghjkl");
-        const id=payload.id;
+        const user=req.user;
         const {oldPassword,newPassword}=req.body;
-        const user=await User.findById(id);
-        if(!user){
-            throw new Error("User not found",{cause:404});
-        }
         const match=bcrypt.compareSync(oldPassword,user.password);
         if(!match){
             throw new Error("Invalid old password",{cause:401});
@@ -53,7 +43,7 @@ export const UploadProfilePic=async(req,res,next)=>{
 }
 
 export const DeleteUnverifiedUsers=()=>{
-    cron.schedule(`* * * * *`,async()=>{
+    cron.schedule(`0 0 1 * *`,async()=>{
        const oneMonthAgo= new Date();
        oneMonthAgo.setMonth(oneMonthAgo.getMonth()-1);
         
@@ -68,4 +58,19 @@ export const DeleteUnverifiedUsers=()=>{
         console.log(`No unverified users found for deletion`);
     }
     })
+}
+
+export const UploadProfilePicCloud=async(req,res,next)=>{
+    const {id}=req.user;
+    const file=req.file;
+    await cloudinary.uploader.destroy(req.user.ProfilePic.public_id);
+    const {secure_url,public_id}=await cloudinary.uploader.upload(file.path,{folder:`saraha/${id}/profilepics`});
+    await User.updateOne({ _id: id }, { ProfilePic: { secure_url, public_id } });
+
+   return res.status(200).json({message:"Profile pic uploaded successfully",success:true,user:req.user});
+
+
+
+
+
 }

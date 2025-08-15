@@ -104,7 +104,7 @@ export const login=async(req,res,next)=>{
 export const googleLogin=async(req,res,next)=>{
  
     const {idToken} = req.body;
-    const client =new OAuth2Client("https://851795671125-a22v1m8afbnd64h1ah15jget51eq0t9u.apps.googleusercontent.com/");
+    const client =new OAuth2Client( "851795671125-a22v1m8afbnd64h1ah15jget51eq0t9u.apps.googleusercontent.com");
     const ticket=await client.verifyIdToken(idToken);
     const payload=ticket.getPayload();
     let user= await User.findOne({email:payload.email});

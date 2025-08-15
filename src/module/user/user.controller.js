@@ -1,10 +1,12 @@
 import Router from "express";
-import { deleteUser, updatePassword, UploadProfilePic } from "./user.service.js";
-import { fileUpload } from "../../utils/multer/index.js";
+import { deleteUser, updatePassword, UploadProfilePic,UploadProfilePicCloud } from "./user.service.js";
+import { fileUpload } from "../../utils/multer/multer.local.js";
+import {fileUpload as fileUploadCloud} from "../../utils/multer/multer.cloud.js";
 import { fileValidationMiddleware } from "../../middlewares/file.validation.middleware.js";
 import { isAuthenticated } from "../../middlewares/auth.middleware.js";
 const router =Router();
-router.delete("/",deleteUser)
-router.put("/update-password",updatePassword);
+router.delete("/",isAuthenticated,deleteUser);
+router.put("/update-password",isAuthenticated,updatePassword);
 router.post("/upload-profile-pic",isAuthenticated,fileUpload({folder:"profilepics",MxSizeMB:1}).single("ProfilePic"),fileValidationMiddleware(),UploadProfilePic);
+router.post("/upload-profile-pic-cloud",isAuthenticated,fileUploadCloud().single("ProfilePic"),UploadProfilePicCloud);
 export default router;

@@ -6,8 +6,8 @@ const transporter=nodemailer.createTransport({
     port:587,
     secure:false,
     auth:{
-        user:"julianageorgeeshak@gmail.com",
-        pass:"hvlm ttsw fchg tyxf"
+        user:process.env.EMAIL,
+        pass:process.env.PASSWORD
     }
 });
 await transporter.sendMail({
