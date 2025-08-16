@@ -1,22 +1,23 @@
 import joi from "joi";
+import { generalFields } from "../../middlewares/validation.middlewares.js";
  
 export const registerSchema =joi.object({
     fullName:joi.string().min(5).max(15).required(),
-    email:joi.string().email({tlds:["com","eg","org"]}),
+    email:generalFields.email,
     password:joi.string().regex(/^[a-zA-Z0-9]{3,30}$/).min(4).required(),
-    phoneNumber:joi.string().min(11).max(11),
-    dob:joi.date()
+    phoneNumber:generalFields.phoneNumber,
+    dob:generalFields.dob
    }).or("email","phoneNumber");
 export const loginSChema=joi.object({
-    email:joi.string().email({tlds:["com","eg","org"]}),
+    email:generalFields.email,
     password:joi.string().regex(/^[a-zA-Z0-9]{3,30}$/).min(4).required(),
-    phoneNumber:joi.string().min(11).max(11)
+    phoneNumber:generalFields.phoneNumber
 }).or("email","phoneNumber");
 export const reSendOtpSchema=joi.object({
-    email:joi.string().email({tlds:["com","eg","org"]}).required()
+    email:generalFields.email.required()
 });
 export const verifyAccountSchema=joi.object({
-    email:joi.string().email({tlds:["com","eg","org"]}).required(),
+    email:generalFields.email.required(),
     otp:joi.number().required()
 });
 export const googleLoginSchema=joi.object({
@@ -26,4 +27,10 @@ export const refreshSchema=joi.object({
     refreshToken:joi.string().required()
 });
 
+export const resetPasswordSchema=joi.object({
+    email:generalFields.email.required(),
+    otp:joi.number().required(),
+    NewPassword:generalFields.password.required(),
+    rePassword:generalFields.rePassword("NewPassword").required()
+})
 

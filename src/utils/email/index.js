@@ -10,6 +10,7 @@ const transporter=nodemailer.createTransport({
         pass:process.env.PASSWORD
     }
 });
+
 await transporter.sendMail({
     from:"'saraha App'<julianageorgeeshak@gmail.com>",
     to,

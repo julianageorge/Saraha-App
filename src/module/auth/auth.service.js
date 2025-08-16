@@ -5,8 +5,8 @@ import { generateOtp } from "../../utils/OTP/index.js";
 import { OAuth2Client } from "google-auth-library";
 import CryptoJS from "crypto-js";
 import { generaterefreshToken, generateToken } from "../../utils/tokens/index.js";
-import jwt from "jsonwebtoken";
-import joi from "joi";
+import { hashPassword } from "../../utils/hash/index.js";
+import Token from "../../DB/model/token.model.js"
 export const register=async(req,res,next)=>{
  const{fullName,email,password,phoneNumber,dob}=req.body;
  
@@ -56,11 +56,14 @@ await user.save();
 return res.status(200).json({message:"User verified successfully",success:true});
 }
 
-export const reSendOtp=async(req,res,next)=>{
+export const SendOtp=async(req,res,next)=>{
 const{email}=req.body;
 const {otp,otpExpired}=generateOtp();
-await User.updateOne({email},{otp,otpExpired});
-await sendMail({to:email,subject:"Resend your email",html:`<p>your Otp to verify your account is ${otp}</p>`})
+const user=await User.findOneAndUpdate({email},{otp,otpExpired});
+if(!user){
+  throw new Error("User not found",{cause:404});
+}
+await sendMail({to:email,subject:"Send Otp",html:`<p>your Otp is ${otp}</p>`})
 return res.status(200).json({message:"Otp sent successfully",success:true});
   }
 
@@ -97,9 +100,11 @@ export const login=async(req,res,next)=>{
     if(!(user.isVerified)){
       throw new Error("User not verified",{cause:401});
   }   
-    const token = generateToken(user._id);
+    const accessToken = generateToken(user._id);
     const refreshToken = generaterefreshToken(user._id);
-    return res.status(200).json({message:"user login successfully",success:true,token,refreshToken});
+    await Token.create({token:refreshToken,userId:user._id,type:"refresh"});
+    
+    return res.status(200).json({message:"user login successfully",success:true,accessToken,refreshToken});
 }
 export const googleLogin=async(req,res,next)=>{
  
@@ -112,16 +117,44 @@ export const googleLogin=async(req,res,next)=>{
        user=await User.create({email:payload.email,fullName:payload.name,
         phoneNumber:payload.phone,dob:payload.birthdate,isVerified:true,userAgent:"google"});
     }
-    const token=generateToken(user._id);
-    return res.status(200).json({message:"user login successfully",success:true,token,user});
+    const accessToken=generateToken(user._id);
+    const refreshToken=generaterefreshToken(user._id);
+    return res.status(200).json({message:"user login successfully",success:true,accessToken,refreshToken,user});
 }
 
 
 export const refresh=async(req,res,next)=>{
     const token=req.headers.authorization;
-    const payload= jwt.verify(token,"julisdfghnvbn");
+    const payload= verifyToken(token,"julisdfghnvbn");
     const id=payload.id;
-    const newToken=generateToken(id);
+    const newAccessToken=generateToken(id);
     const newRefreshToken=generaterefreshToken(id);
-    return res.status(200).json({message:"user login successfully",success:true,token:newToken,refreshToken:newRefreshToken});
+    return res.status(200).json({message:"user login successfully",success:true,accessToken:newAccessToken,refreshToken:newRefreshToken});
+}
+
+
+export const resetPassword =async(req,res,next)=>{
+  const{otp,email,NewPassword}=req.body;
+  const user = await User.findOne({email});
+  if(!user){
+    throw new Error("User not found",{cause:404});
+  }
+  if(otp!=user.otp){
+    throw new Error("Invalid otp",{cause:401});
+  }
+  if(user.otpExpired<Date.now()){
+    throw new Error("Otp expired",{cause:401});
+  }
+  user.password=hashPassword(NewPassword);
+  await user.save();
+  return res.status(200).json({message:"password reset successfully",success:true});
+}
+
+export const logout=async(req,res,next)=>{
+
+  const token=req.headers.authorization;
+  await Token.create({token,user:req.user._id});
+  return res.status(200).json({message:"user logout successfully",success:true});
+  
+
 }

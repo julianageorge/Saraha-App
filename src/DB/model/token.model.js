@@ -1,4 +1,4 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema,model } from "mongoose";
 
 const schema=new Schema({
     
@@ -6,9 +6,15 @@ const schema=new Schema({
             type: mongoose.Schema.Types.ObjectId,
              ref: 'User'
              },
-             token:{type:String,required:true},
+        token:{type:String,required:true},
+        type:{
+            type:String,
+            enum:["refresh","access"],
+            default:"refresh"
+        }
 
 
 },
 {timestamps:true})
-export const model=model("Token",schema);
+const Token= model("Token",schema);
+export default Token;

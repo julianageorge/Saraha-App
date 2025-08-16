@@ -63,9 +63,11 @@ export const DeleteUnverifiedUsers=()=>{
 export const UploadProfilePicCloud=async(req,res,next)=>{
     const {id}=req.user;
     const file=req.file;
-    await cloudinary.uploader.destroy(req.user.ProfilePic.public_id);
+    if(req.user.ProfilePic.public_id){
+        await cloudinary.uploader.destroy(req.user.ProfilePic.public_id);}
+    
     const {secure_url,public_id}=await cloudinary.uploader.upload(file.path,{folder:`saraha/${id}/profilepics`});
-    await User.updateOne({ _id: id }, { ProfilePic: { secure_url, public_id } });
+    await User.updateOne({ _id: id }, { ProfilePic: { secure_url, public_id } },{new:true});
 
    return res.status(200).json({message:"Profile pic uploaded successfully",success:true,user:req.user});
 

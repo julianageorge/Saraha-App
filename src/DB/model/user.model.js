@@ -51,7 +51,8 @@ const schema = new Schema({
     },
     ProfilePic:{
        secure_url:{type:String},
-       public_id:{type:String}
+       public_id:{type:String},
+       
 
     },
     lastActive:{

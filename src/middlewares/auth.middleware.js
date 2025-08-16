@@ -1,5 +1,6 @@
 import { verifyToken } from "../utils/tokens/index.js";
 import User from "../DB/model/user.model.js";
+import Token from "../DB/model/token.model.js";
 
 export const isAuthenticated=async(req,res,next)=>{
     const token=req.headers.authorization;
@@ -9,6 +10,10 @@ export const isAuthenticated=async(req,res,next)=>{
     const payload=verifyToken(token);
     if(!payload){
         throw new Error("Invalid token",{cause:401});
+    }
+    const BlockedToken= await Token.findOne({token,type:"access"});
+    if(BlockedToken){
+        throw new Error("token is blocked",{cause:401});
     }
     const id=payload.id;
     const user=await User.findById(id);
