@@ -14,7 +14,7 @@ export const asyncHandler=(fn)=>{
   }
 
   export const globalErrorHandler=async(err,req,res,next)=>{
-    
+    try{
             if(req.file){
                 fs.unlinkSync(req.file.path);
             }
@@ -33,4 +33,7 @@ export const asyncHandler=(fn)=>{
               }
                
             return res.status(err.cause||500).json({message:err.message,success:false,stack:err.stack});
+  }catch(err){
+    return res.status(err.cause||500).json({message:err.message,success:false,stack:err.stack});
   }
+}

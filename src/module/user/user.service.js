@@ -2,7 +2,7 @@ import User from "../../DB/model/user.model.js";
 import bcrypt from "bcrypt";
 import fs from "fs";
 import cron from "node-cron";
-import cloudinary from "../../utils/cloud/cloudinary.config.js";
+import cloudinary, { deleteFiles, uploadFile } from "../../utils/cloud/cloudinary.config.js";
 export const deleteUser=async(req,res,next)=>{
         const {id}=req.user;
         //delete from cloudinary
@@ -64,9 +64,9 @@ export const UploadProfilePicCloud=async(req,res,next)=>{
     const {id}=req.user;
     const file=req.file;
     if(req.user.ProfilePic.public_id){
-        await cloudinary.uploader.destroy(req.user.ProfilePic.public_id);}
+        await deleteFiles(`saraha/${id}/profilepics`);}
     
-    const {secure_url,public_id}=await cloudinary.uploader.upload(file.path,{folder:`saraha/${id}/profilepics`});
+    const {secure_url,public_id}=await uploadFile({path:file.path,options:{folder:`saraha/${id}/profilepics`}});
     await User.updateOne({ _id: id }, { ProfilePic: { secure_url, public_id } },{new:true});
 
    return res.status(200).json({message:"Profile pic uploaded successfully",success:true,user:req.user});

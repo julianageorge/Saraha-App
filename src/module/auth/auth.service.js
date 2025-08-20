@@ -150,6 +150,7 @@ export const resetPassword =async(req,res,next)=>{
   user.password=hashPassword(NewPassword);
   user.CredentialsUpdatedAt=Date.now();
   await user.save();
+  await Token.deleteMany({userId:user._id,type:"refresh"});
   return res.status(200).json({message:"password reset successfully",success:true});
 }
 
