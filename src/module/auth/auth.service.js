@@ -145,7 +145,10 @@ export const resetPassword =async(req,res,next)=>{
   if(user.otpExpired<Date.now()){
     throw new Error("Otp expired",{cause:401});
   }
+  user.otp=undefined;
+  user.otpExpired=undefined;
   user.password=hashPassword(NewPassword);
+  user.CredentialsUpdatedAt=Date.now();
   await user.save();
   return res.status(200).json({message:"password reset successfully",success:true});
 }

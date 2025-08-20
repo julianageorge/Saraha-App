@@ -32,5 +32,9 @@ export const resetPasswordSchema=joi.object({
     otp:joi.number().required(),
     NewPassword:generalFields.password.required(),
     rePassword:generalFields.rePassword("NewPassword").required()
-})
+});
+
+export const logoutSchema=joi.object({
+    refreshToken:joi.string().required(),
+});
 

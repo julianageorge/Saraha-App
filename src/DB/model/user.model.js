@@ -58,6 +58,10 @@ const schema = new Schema({
     lastActive:{
         type:Date,
         default:Date.now()
+    },
+    CredentialsUpdatedAt:{
+        type:Date,
+        default:Date.now()
     }
 
 },
