@@ -139,7 +139,7 @@ export const resetPassword =async(req,res,next)=>{
   if(!user){
     throw new Error("User not found",{cause:404});
   }
-  if(otp!=user.otp){
+  if(otp!==user.otp){
     throw new Error("Invalid otp",{cause:401});
   }
   if(user.otpExpired<Date.now()){

@@ -6,9 +6,6 @@ export const SendMessage=async(req,res,next)=>{
     const {receiver}=req.params;
     const {files}=req;
     const attachments=await uploadFiles({files,options:{folder:`saraha/${receiver}/messages`}});
-    const message=await Message.create({content,receiver,attachments});
+    const message=await Message.create({content,receiver,attachments,sender:req.user?._id});
     return res.status(201).json({message:"Message sent successfully",success:true,message});
-
-
-
 }

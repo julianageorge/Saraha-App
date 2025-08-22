@@ -20,5 +20,6 @@ export const generalFields={
   fullName:joi.string().min(5).max(15).required(),
   dob:joi.date(),
   rePassword:(ref)=>joi.string().required().valid(joi.ref(ref)),
-  ObjectId:joi.string().hex().length(24)
+  ObjectId:joi.string().hex().length(24),
+  otp:joi.number().required(),
 }
