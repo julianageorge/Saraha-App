@@ -3,13 +3,12 @@ import bcrypt from "bcrypt";
 import fs from "fs";
 import cron from "node-cron";
 import cloudinary, { deleteFiles, uploadFile } from "../../utils/cloud/cloudinary.config.js";
+import Token from "../../DB/model/token.model.js";
 export const deleteUser=async(req,res,next)=>{
-        const {id}=req.user;
-        //delete from cloudinary
-        if(req.user.ProfilePic.public_id){
-          await cloudinary.api.delete_resources_by_prefix(`saraha/${id}/profilepics`);
-        }  await cloudinary.api.delete_folder(`saraha/${id}/profilepics`);
-         await User.deleteOne({_id:id});
+    const {id}=req.user;
+    await User.updateOne({_id:id},{deletedAt:Date.now(),CredentialsUpdatedAt:Date.now()});
+    await Token.deleteMany({userId:id,type:"refresh"});
+  
         return res.status(200).json({message:"User deleted successfully",success:true});
 
    

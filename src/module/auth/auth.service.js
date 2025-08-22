@@ -97,6 +97,10 @@ export const login=async(req,res,next)=>{
     if(!match){  
         throw new  Error("Invalid cradintials",{cause:401});
     }
+    if(user.deletedAt){
+     user.deletedAt=undefined;
+     await user.save();
+    }
     if(!(user.isVerified)){
       throw new Error("User not verified",{cause:401});
   }   

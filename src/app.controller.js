@@ -8,7 +8,7 @@ import rateLimit from "express-rate-limit";
 export const bootstrap=(app,express)=>{
     const limiter=rateLimit({
         windowMs:60*1000,
-        max:3,
+        max:10,
        // message:"Too many requests from this IP, please try again after a minute",
         handler:(req,res,next,options)=>{
             throw new Error("Too many requests from this IP, please try again after a minute",{cause:429});
@@ -29,7 +29,6 @@ export const bootstrap=(app,express)=>{
     ConnectDB();
     app.use(globalErrorHandler);
 
-    DeleteUnverifiedUsers();
 
 
 }
