@@ -23,9 +23,7 @@ export const verifyAccountSchema=joi.object({
 export const googleLoginSchema=joi.object({
     idToken:joi.string().required()
 });
-export const refreshSchema=joi.object({
-    refreshToken:joi.string().required()
-});
+
 
 export const resetPasswordSchema=joi.object({
     email:generalFields.email.required(),
@@ -34,7 +32,5 @@ export const resetPasswordSchema=joi.object({
     rePassword:generalFields.rePassword("NewPassword").required()
 });
 
-export const logoutSchema=joi.object({
-    refreshToken:joi.string().required(),
-});
+
 

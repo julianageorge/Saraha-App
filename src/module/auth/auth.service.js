@@ -4,7 +4,7 @@ import { sendMail } from "../../utils/email/index.js";
 import { generateOtp } from "../../utils/OTP/index.js";
 import { OAuth2Client } from "google-auth-library";
 import CryptoJS from "crypto-js";
-import { generaterefreshToken, generateToken } from "../../utils/tokens/index.js";
+import { generaterefreshToken, generateToken, verifyToken } from "../../utils/tokens/index.js";
 import { hashPassword } from "../../utils/hash/index.js";
 import Token from "../../DB/model/token.model.js"
 export const register=async(req,res,next)=>{
@@ -128,8 +128,8 @@ export const googleLogin=async(req,res,next)=>{
 
 
 export const refresh=async(req,res,next)=>{
-    const token=req.headers.authorization;
-    const payload= verifyToken(token,"julisdfghnvbn");
+    const refreshtoken=req.headers.refreshtoken;
+    const payload= verifyToken(refreshtoken,"julisdfghnvbn");
     const id=payload.id;
     const newAccessToken=generateToken(id);
     const newRefreshToken=generaterefreshToken(id);
@@ -143,7 +143,7 @@ export const resetPassword =async(req,res,next)=>{
   if(!user){
     throw new Error("User not found",{cause:404});
   }
-  if(otp!==user.otp){
+  if(otp!=user.otp){
     throw new Error("Invalid otp",{cause:401});
   }
   if(user.otpExpired<Date.now()){
