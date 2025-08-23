@@ -80,6 +80,11 @@ schema.virtual("fullName").set(function(value){
 });
 schema.virtual("age").get(function(){
     return new Date().getFullYear()-new Date(this.dob).getFullYear();
+});
+schema.virtual("messages",{
+    ref:"Message",
+    localField:"_id",
+    foreignField:"receiver"
 })
 
 const User=model("User",schema);

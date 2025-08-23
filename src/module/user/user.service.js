@@ -75,3 +75,11 @@ export const UploadProfilePicCloud=async(req,res,next)=>{
 
 
 }
+
+export const getProfile=async(req,res,next)=>{
+    const {id}=req.user;
+    const user= await User.findOne({_id:id},{},{populate:[{path:"messages"}]});
+    return res.status(200).json({message:"Profile fetched successfully",success:true,user});
+
+
+}
